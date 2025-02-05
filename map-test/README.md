@@ -1,3 +1,7 @@
+resize? - 캔버스 이미지 전부 해야함
+refactor - chatgpt
+char - dog
+
 # rollup-starter-app
 
 https://technologies4.me//articles/tile-map-canvas-javascript-a1/canvas-tile-map-source-code-p2/
