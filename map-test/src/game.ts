@@ -47,6 +47,7 @@ export class Game {
   private render(): void {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.renderer.drawMap();
+    this.renderer.drawDog();
     // Draw game elements here
   }
 }

@@ -1,20 +1,24 @@
 import { MapGenerator } from "./mapGenerator";
 import { AssetLoader } from "./assetLoader";
 import { MapPainter } from "./mapPainter";
+import { DogPainter, SPRITE_HEIGHT, SPRITE_WIDTH } from "./dogPainter";
 
 export class Renderer {
   private assetLoader: any;
   private mapPainter: any;
   private mapGenerator: any;
+  private dogPainter: any;
 
   constructor() {
     // Later given map size,
     const mapGenerator = new MapGenerator(10, 10);
     const mapPainter = new MapPainter();
     const assetLoader = new AssetLoader();
+    const dogPainter = new DogPainter();
     this.assetLoader = assetLoader;
     this.mapGenerator = mapGenerator;
     this.mapPainter = mapPainter;
+    this.dogPainter = dogPainter;
   }
 
   public drawMap() {
@@ -42,6 +46,27 @@ export class Renderer {
           );
         }
       }
+    });
+  }
+
+  public drawDog() {
+    const canvas = document.getElementById("game") as HTMLCanvasElement;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    this.assetLoader.loadImage("map", "dogtileset.png").then((image) => {
+      if (!ctx) return;
+      const dog = this.dogPainter.spritePositionToImagePosition(0, 1);
+      ctx.drawImage(
+        image,
+        dog.x,
+        dog.y,
+        SPRITE_WIDTH,
+        SPRITE_HEIGHT,
+        0,
+        0,
+        40,
+        40
+      );
     });
   }
 }
