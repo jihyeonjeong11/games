@@ -18,7 +18,7 @@ export enum Direction {
   NONE = "none",
 }
 
-export class Event {
+export class GameEvent {
   private keys: Set<string> = new Set();
 
   constructor() {

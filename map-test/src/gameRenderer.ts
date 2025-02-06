@@ -33,8 +33,8 @@ export class GameRenderer {
     this.mapRenderer.render(this.assetLoader.getImage("map"));
   }
 
-  public renderDog() {
-    this.dogRenderer.render(this.assetLoader.getImage("dog"));
+  public renderDog(char: any) {
+    this.dogRenderer.render(this.assetLoader.getImage("dog"), char);
   }
 
   public drawMap() {
