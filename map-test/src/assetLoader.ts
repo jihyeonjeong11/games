@@ -1,5 +1,12 @@
 export class AssetLoader {
-  private assets: Map<string, HTMLImageElement> = new Map();
+  public assets: Map<string, HTMLImageElement> = new Map();
+
+  async loadAll(): Promise<void> {
+    await Promise.all([
+      this.loadImage("map", "floortileset.png"),
+      this.loadImage("dog", "dogtileset.png"),
+    ]);
+  }
 
   public loadImage(key: string, src: string): Promise<HTMLImageElement> {
     return new Promise((resolve, reject) => {

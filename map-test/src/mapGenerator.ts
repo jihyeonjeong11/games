@@ -1,7 +1,8 @@
 export type TileType = 0 | 1 | 2;
+export type GameMap = TileType[][];
 
 export class MapGenerator {
-  private map: TileType[][];
+  private map: GameMap;
   private rows: number;
   private cols: number;
 

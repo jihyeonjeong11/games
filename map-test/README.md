@@ -1,6 +1,7 @@
 resize? - 캔버스 이미지 전부 해야함
 refactor - chatgpt
 char - dog
+https://codehs.com/tutorial/andy/Programming_Sprites_in_JavaScript
 
 # rollup-starter-app
 

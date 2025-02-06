@@ -2,30 +2,47 @@ import { MapGenerator } from "./mapGenerator";
 import { AssetLoader } from "./assetLoader";
 import { MapPainter } from "./mapPainter";
 import { DogPainter, SPRITE_HEIGHT, SPRITE_WIDTH } from "./dogPainter";
+import { MapRenderer } from "./mapRenderer";
+import { GameCanvas } from "./gameCanvas";
+import { DogRenderer } from "./dogRenderer";
+// holds pregenerated maps
 
-export class Renderer {
+export class GameRenderer {
   private assetLoader: any;
   private mapPainter: any;
   private mapGenerator: any;
   private dogPainter: any;
+  private mapRenderer: MapRenderer;
+  private gameCanvas: GameCanvas;
+  private dogRenderer: DogRenderer;
 
-  constructor() {
+  constructor(gameCanvas: GameCanvas, assetLoader: AssetLoader) {
     // Later given map size,
     const mapGenerator = new MapGenerator(10, 10);
     const mapPainter = new MapPainter();
-    const assetLoader = new AssetLoader();
     const dogPainter = new DogPainter();
     this.assetLoader = assetLoader;
     this.mapGenerator = mapGenerator;
     this.mapPainter = mapPainter;
     this.dogPainter = dogPainter;
+    this.mapRenderer = new MapRenderer(gameCanvas);
+    this.dogRenderer = new DogRenderer(gameCanvas);
+  }
+
+  public renderMap() {
+    this.mapRenderer.render(this.assetLoader.getImage("map"));
+  }
+
+  public renderDog() {
+    this.dogRenderer.render(this.assetLoader.getImage("dog"));
   }
 
   public drawMap() {
     const canvas = document.getElementById("game") as HTMLCanvasElement;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
-    this.assetLoader.loadImage("map", "floortileset.png").then((image) => {
+
+    this.assetLoader.loadImage("map").then((image) => {
       if (!ctx) return;
       const map = this.mapGenerator.getMap();
       const painter = this.mapPainter;
