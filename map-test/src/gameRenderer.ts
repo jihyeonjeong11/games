@@ -4,7 +4,9 @@ import { MapPainter } from "./mapPainter";
 import { DogPainter, SPRITE_HEIGHT, SPRITE_WIDTH } from "./dogPainter";
 import { MapRenderer } from "./mapRenderer";
 import { GameCanvas } from "./gameCanvas";
-import { DogRenderer } from "./dogRenderer";
+import { playableRenderer } from "./playableRenderer";
+import { TILE_H, TILE_W } from "./enums";
+import { Position } from "./types";
 // holds pregenerated maps
 
 export class GameRenderer {
@@ -14,7 +16,7 @@ export class GameRenderer {
   private dogPainter: any;
   private mapRenderer: MapRenderer;
   private gameCanvas: GameCanvas;
-  private dogRenderer: DogRenderer;
+  private playableRenderer: playableRenderer;
 
   constructor(gameCanvas: GameCanvas, assetLoader: AssetLoader) {
     // Later given map size,
@@ -26,15 +28,19 @@ export class GameRenderer {
     this.mapPainter = mapPainter;
     this.dogPainter = dogPainter;
     this.mapRenderer = new MapRenderer(gameCanvas);
-    this.dogRenderer = new DogRenderer(gameCanvas);
+    this.playableRenderer = new playableRenderer(gameCanvas);
   }
 
   public renderMap() {
     this.mapRenderer.render(this.assetLoader.getImage("map"));
   }
 
-  public renderDog(char: any) {
-    this.dogRenderer.render(this.assetLoader.getImage("dog"), char);
+  public renderPlayable(char: any, position: Position) {
+    this.playableRenderer.render(
+      this.assetLoader.getImage("dog"),
+      char,
+      position
+    );
   }
 
   public drawMap() {
@@ -56,8 +62,8 @@ export class GameRenderer {
             painter.tileImageSize * clipH,
             painter.tileImageSize,
             painter.tileImageSize,
-            col * painter.tileW,
-            row * painter.tileH,
+            col * TILE_W,
+            row * TILE_H,
             painter.tileW,
             painter.tileH
           );

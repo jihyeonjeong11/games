@@ -1,10 +1,13 @@
 // src/Game.ts
 import { AssetLoader } from "./assetLoader";
-import { Direction } from "./gameEvent";
 import { GameCanvas } from "./gameCanvas";
 import { GameRenderer } from "./gameRenderer";
 import { GameEvent } from "./gameEvent";
 import { FrameLimiter } from "./frameLimiter";
+import { Playable, PlayableType } from "./entities/playable";
+import { TILE_H, TILE_W } from "./enums";
+import { Direction } from "./types";
+import { Dog } from "./entities/dog";
 
 export class Game {
   private ctx: CanvasRenderingContext2D;
@@ -13,7 +16,7 @@ export class Game {
   private gameCanvas: GameCanvas;
   private isLoaded: boolean;
   private assetLoader: AssetLoader;
-  private dogChar: any;
+  private playable: Dog;
   private gameEvent: GameEvent;
   private frameLimiter: FrameLimiter;
 
@@ -21,6 +24,7 @@ export class Game {
     this.gameCanvas = new GameCanvas(canvasId);
     this.assetLoader = new AssetLoader();
     this.renderer = new GameRenderer(this.gameCanvas, this.assetLoader);
+    this.playable = new Dog();
 
     if (!this.gameCanvas) {
       throw new Error(`Canvas with ID "${canvasId}" not found.`);
@@ -34,12 +38,6 @@ export class Game {
     this.ctx = context;
 
     this.gameEvent = new GameEvent();
-    this.dogChar = {
-      position: { x: 0, y: 0 },
-      speed: 100,
-      direction: Direction.NONE,
-      isMoving: false,
-    };
 
     this.frameLimiter = new FrameLimiter(10);
 
@@ -75,36 +73,40 @@ export class Game {
   }
 
   private updateCharacterMovement(deltaTime: number): void {
+    const playable = this.playable.getPlayable();
     const direction = this.gameEvent.getDirection();
-    const moveAmount = (this.dogChar.speed * deltaTime) / 1000; // Convert to seconds
+    const moveAmount = (playable.speed * deltaTime) / 1000; // Convert to seconds
 
-    this.dogChar.direction = direction;
-    this.dogChar.isMoving = direction !== Direction.NONE;
+    const newLocation: PlayableType = { ...playable };
+
+    newLocation.direction = direction;
+    newLocation.isMoving = direction !== Direction.NONE;
 
     switch (direction) {
       case Direction.UP:
-        this.dogChar.position.y -= moveAmount;
+        newLocation.position.y -= moveAmount;
         break;
       case Direction.DOWN:
-        this.dogChar.position.y += moveAmount;
+        newLocation.position.y += moveAmount;
         break;
       case Direction.LEFT:
-        this.dogChar.position.x -= moveAmount;
+        newLocation.position.x -= moveAmount;
         break;
       case Direction.RIGHT:
-        this.dogChar.position.x += moveAmount;
+        newLocation.position.x += moveAmount;
         break;
     }
 
     // Add boundary checking
-    this.dogChar.position.x = Math.max(
+    newLocation.position.x = Math.max(
       0,
-      Math.min(this.dogChar.position.x, this.gameCanvas.canvasWidth - 32)
-    ); // Assuming dogChar width is 32
-    this.dogChar.position.y = Math.max(
+      Math.min(newLocation.position.x, this.gameCanvas.canvasWidth - TILE_W)
+    ); // Assuming playable width is 32
+    playable.position.y = Math.max(
       0,
-      Math.min(this.dogChar.position.y, this.gameCanvas.canvasHeight - 32)
+      Math.min(newLocation.position.y, this.gameCanvas.canvasHeight - TILE_H)
     ); // Assuming character height is 32
+    this.playable.setPlayable(newLocation);
   }
 
   setGameSpeed(fps: number): void {
@@ -127,7 +129,12 @@ export class Game {
       this.gameCanvas.canvasHeight
     );
     this.renderer.renderMap();
-    this.renderer.renderDog(this.dogChar);
+    this.renderer.renderPlayable(
+      this.playable.getPlayable(),
+      this.playable.getPlayable().isMoving
+        ? this.playable.walkAnimation(this.playable.getPlayable().direction)
+        : this.playable.idleAnimation()
+    );
     // Draw game elements here
   }
 }

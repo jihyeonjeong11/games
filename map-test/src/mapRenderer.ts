@@ -1,3 +1,4 @@
+import { TILE_H, TILE_W } from "./enums";
 import { GameCanvas } from "./gameCanvas";
 import { GameMap, MapGenerator } from "./mapGenerator";
 import { MapPainter } from "./mapPainter";
@@ -13,7 +14,6 @@ export class MapRenderer {
   render(asset: HTMLImageElement): void {
     const ctx = this.canvas.getContext();
     const painter = new MapPainter();
-
     for (let row = 0; row < this.gameMap.length; row++) {
       for (let col = 0; col < this.gameMap[row].length; col++) {
         const tile = this.gameMap[row][col];
@@ -25,10 +25,10 @@ export class MapRenderer {
           painter.tileImageSize * clipH,
           painter.tileImageSize,
           painter.tileImageSize,
-          col * painter.tileW,
-          row * painter.tileH,
-          painter.tileW,
-          painter.tileH
+          col * TILE_W,
+          row * TILE_H,
+          TILE_W,
+          TILE_H
         );
       }
     }

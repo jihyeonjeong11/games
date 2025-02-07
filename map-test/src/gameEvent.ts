@@ -1,22 +1,4 @@
-export interface Position {
-  x: number;
-  y: number;
-}
-
-export interface Character {
-  position: Position;
-  speed: number;
-  direction: Direction;
-  isMoving: boolean;
-}
-
-export enum Direction {
-  UP = "up",
-  DOWN = "down",
-  LEFT = "left",
-  RIGHT = "right",
-  NONE = "none",
-}
+import { Direction } from "./types";
 
 export class GameEvent {
   private keys: Set<string> = new Set();

@@ -1,15 +1,13 @@
 import { DogPainter, SPRITE_HEIGHT, SPRITE_WIDTH } from "./dogPainter";
 import { GameCanvas } from "./gameCanvas";
+import { Position } from "./types";
 
-export class DogRenderer {
-  constructor(private canvas: GameCanvas, char) {}
+export class playableRenderer {
+  constructor(private canvas: GameCanvas) {}
 
-  // this will be used rater to save pregenerated map after stage movement feature.
-  render(asset: HTMLImageElement, char: any): void {
+  render(asset: HTMLImageElement, char: any, position: Position): void {
     const ctx = this.canvas.getContext();
     const dogSprites = new DogPainter();
-    console.log(char);
-    const position = dogSprites.spritePositionToImagePosition(1, 0);
     ctx.drawImage(
       asset,
       position.x,

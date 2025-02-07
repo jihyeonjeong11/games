@@ -1,5 +1,5 @@
-export const SPRITE_WIDTH = 167;
-export const SPRITE_HEIGHT = 178;
+export const SPRITE_WIDTH = 161;
+export const SPRITE_HEIGHT = 151;
 export const BORDER_WIDTH = 1;
 export const SPACING_WIDTH = 1;
 
