@@ -8,6 +8,7 @@ export class MapPainter {
     0: { clipW: 1, clipH: 7 }, // dirt
     1: { clipW: 1, clipH: 3 }, // grass
     2: { clipW: 6, clipH: 7 }, // woods
+    3: { clipW: 7, clipH: 1 }, // boundary
   };
 
   constructor() {

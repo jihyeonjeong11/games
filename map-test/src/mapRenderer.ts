@@ -1,24 +1,25 @@
 import { TILE_H, TILE_W } from "./enums";
 import { GameCanvas } from "./gameCanvas";
-import { GameMap, MapGenerator } from "./mapGenerator";
+import { GameMap } from "./mapGenerator";
 import { MapPainter } from "./mapPainter";
+import { isCenterTile } from "./utils";
 
 export class MapRenderer {
-  private gameMap: GameMap;
+  constructor(private canvas: GameCanvas) {}
 
-  constructor(private canvas: GameCanvas) {
-    this.gameMap = new MapGenerator(10, 10).getMap();
-  }
-
-  // this will be used rater to save pregenerated map after stage movement feature.
-  render(asset: HTMLImageElement): void {
+  render(asset: HTMLImageElement, gameMap: GameMap): void {
     const ctx = this.canvas.getContext();
     const painter = new MapPainter();
-    for (let row = 0; row < this.gameMap.length; row++) {
-      for (let col = 0; col < this.gameMap[row].length; col++) {
-        const tile = this.gameMap[row][col];
-        const { clipW, clipH } = painter.paint(tile);
+    const rowCount = gameMap.length;
+    const colCount = gameMap[0].length;
 
+    for (let row = 0; row < rowCount; row++) {
+      for (let col = 0; col < colCount; col++) {
+        const tile = isCenterTile(row, col, rowCount, colCount)
+          ? 3
+          : gameMap[row][col];
+
+        const { clipW, clipH } = painter.paint(tile);
         ctx.drawImage(
           asset,
           painter.tileImageSize * clipW,

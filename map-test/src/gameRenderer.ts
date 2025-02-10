@@ -1,4 +1,4 @@
-import { MapGenerator } from "./mapGenerator";
+import { GameMap, MapGenerator } from "./mapGenerator";
 import { AssetLoader } from "./assetLoader";
 import { MapPainter } from "./mapPainter";
 import { DogPainter, SPRITE_HEIGHT, SPRITE_WIDTH } from "./dogPainter";
@@ -12,7 +12,6 @@ import { Position } from "./types";
 export class GameRenderer {
   private assetLoader: any;
   private mapPainter: any;
-  private mapGenerator: any;
   private dogPainter: any;
   private mapRenderer: MapRenderer;
   private gameCanvas: GameCanvas;
@@ -20,19 +19,17 @@ export class GameRenderer {
 
   constructor(gameCanvas: GameCanvas, assetLoader: AssetLoader) {
     // Later given map size,
-    const mapGenerator = new MapGenerator(10, 10);
     const mapPainter = new MapPainter();
     const dogPainter = new DogPainter();
     this.assetLoader = assetLoader;
-    this.mapGenerator = mapGenerator;
     this.mapPainter = mapPainter;
     this.dogPainter = dogPainter;
     this.mapRenderer = new MapRenderer(gameCanvas);
     this.playableRenderer = new playableRenderer(gameCanvas);
   }
 
-  public renderMap() {
-    this.mapRenderer.render(this.assetLoader.getImage("map"));
+  public renderMap(gameMap: GameMap) {
+    this.mapRenderer.render(this.assetLoader.getImage("map"), gameMap);
   }
 
   public renderPlayable(char: any, position: Position) {
@@ -43,20 +40,19 @@ export class GameRenderer {
     );
   }
 
-  public drawMap() {
+  public drawMap(map: GameMap) {
     const canvas = document.getElementById("game") as HTMLCanvasElement;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
 
     this.assetLoader.loadImage("map").then((image) => {
       if (!ctx) return;
-      const map = this.mapGenerator.getMap();
       const painter = this.mapPainter;
       for (let row = 0; row < map.length; row++) {
         for (let col = 0; col < map[row].length; col++) {
           const tile = map[row][col];
           const { clipW, clipH } = painter.paint(tile);
-          ctx.drawImage(
+          const isCenter = ctx.drawImage(
             image,
             painter.tileImageSize * clipW,
             painter.tileImageSize * clipH,

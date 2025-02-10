@@ -8,6 +8,8 @@ import { Playable, PlayableType } from "./entities/playable";
 import { TILE_H, TILE_W } from "./enums";
 import { Direction } from "./types";
 import { Dog } from "./entities/dog";
+import { GameMap, MapGenerator } from "./mapGenerator";
+import { _whatTile, isCenterTile } from "./utils";
 
 export class Game {
   private ctx: CanvasRenderingContext2D;
@@ -19,9 +21,15 @@ export class Game {
   private playable: Dog;
   private gameEvent: GameEvent;
   private frameLimiter: FrameLimiter;
+  private mapGenerator: MapGenerator;
+  private gameMap: GameMap;
+  private debugCanvas: GameCanvas;
 
   constructor(canvasId: string) {
+    this.mapGenerator = new MapGenerator(10, 10);
+    if (!this.gameMap) this.gameMap = this.mapGenerator.getMap();
     this.gameCanvas = new GameCanvas(canvasId);
+    this.debugCanvas = new GameCanvas("debug");
     this.assetLoader = new AssetLoader();
     this.renderer = new GameRenderer(this.gameCanvas, this.assetLoader);
     this.playable = new Dog();
@@ -96,6 +104,7 @@ export class Game {
         newLocation.position.x += moveAmount;
         break;
     }
+    // Add Woods collision checking
 
     // Add boundary checking
     newLocation.position.x = Math.max(
@@ -106,6 +115,9 @@ export class Game {
       0,
       Math.min(newLocation.position.y, this.gameCanvas.canvasHeight - TILE_H)
     ); // Assuming character height is 32
+
+    // detect map movement
+
     this.playable.setPlayable(newLocation);
   }
 
@@ -121,6 +133,34 @@ export class Game {
     this.frameLimiter.disable();
   }
 
+  // make this into another class
+  private drawDebugInfo(): void {
+    const { x, y } = this.playable.getPlayable().position;
+    const ctx = this.debugCanvas?.getContext()!;
+    ctx.clearRect(
+      0,
+      0,
+      this.debugCanvas.canvasWidth,
+      this.debugCanvas.canvasHeight
+    );
+    ctx.font = "14px Arial";
+    ctx.fillStyle = "black";
+    const tileCoord = _whatTile(x, y);
+    const canMoveAnotherMap = isCenterTile(
+      tileCoord.row,
+      tileCoord.col,
+      this.gameMap.length,
+      this.gameMap[0].length
+    );
+    ctx.fillText(
+      `X: ${Math.floor(x)}, Y: ${Math.floor(
+        y
+      )}, isCenterTile: ${canMoveAnotherMap}`,
+      15,
+      25
+    );
+  }
+
   private async render(): Promise<any> {
     this.ctx.clearRect(
       0,
@@ -128,13 +168,13 @@ export class Game {
       this.gameCanvas.canvasWidth,
       this.gameCanvas.canvasHeight
     );
-    this.renderer.renderMap();
+    this.renderer.renderMap(this.gameMap);
+    this.drawDebugInfo();
     this.renderer.renderPlayable(
       this.playable.getPlayable(),
       this.playable.getPlayable().isMoving
         ? this.playable.walkAnimation(this.playable.getPlayable().direction)
         : this.playable.idleAnimation()
     );
-    // Draw game elements here
   }
 }
