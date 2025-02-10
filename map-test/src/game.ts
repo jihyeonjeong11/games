@@ -10,6 +10,7 @@ import { Direction } from "./types";
 import { Dog } from "./entities/dog";
 import { GameMap, MapGenerator } from "./mapGenerator";
 import { _whatTile, isCenterTile } from "./utils";
+import TileMap from "./TileMap";
 
 export class Game {
   private ctx: CanvasRenderingContext2D;
@@ -24,10 +25,13 @@ export class Game {
   private mapGenerator: MapGenerator;
   private gameMap: GameMap;
   private debugCanvas: GameCanvas;
+  private tileMap: TileMap;
 
   constructor(canvasId: string) {
     this.mapGenerator = new MapGenerator(10, 10);
     if (!this.gameMap) this.gameMap = this.mapGenerator.getMap();
+    this.tileMap = new TileMap(this.mapGenerator.getMap());
+
     this.gameCanvas = new GameCanvas(canvasId);
     this.debugCanvas = new GameCanvas("debug");
     this.assetLoader = new AssetLoader();
@@ -83,7 +87,8 @@ export class Game {
   private updateCharacterMovement(deltaTime: number): void {
     const playable = this.playable.getPlayable();
     const direction = this.gameEvent.getDirection();
-    const moveAmount = (playable.speed * deltaTime) / 1000; // Convert to seconds
+    const moveAmount = (playable.speed * deltaTime) / 1000;
+    const { x, y } = this.playable.getPlayable().position;
 
     const newLocation: PlayableType = { ...playable };
 
@@ -117,8 +122,23 @@ export class Game {
     ); // Assuming character height is 32
 
     // detect map movement
+    const tileCoord = _whatTile(x, y);
+    const movementDirection = isCenterTile(
+      tileCoord.row,
+      tileCoord.col,
+      this.gameMap.length,
+      this.gameMap[0].length
+    );
 
-    this.playable.setPlayable(newLocation);
+    if (movementDirection) {
+      const connectedMap = this.tileMap.connectMap(
+        movementDirection,
+        new MapGenerator(10, 10).getMap()
+      );
+      console.log(this.tileMap.getNeighbors(0, 0));
+    } else {
+      this.playable.setPlayable(newLocation);
+    }
   }
 
   setGameSpeed(fps: number): void {

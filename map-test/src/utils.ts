@@ -26,12 +26,15 @@ export function isCenterTile(
     colCount
   );
 
-  return (
-    (row === 0 && centerCols.includes(col)) || // Top center(s)
-    (row === lastRow && centerCols.includes(col)) || // Bottom center(s)
-    (col === 0 && centerRows.includes(row)) || // Left center(s)
-    (col === lastCol && centerRows.includes(row)) // Right center(s)
-  );
+  return row === 0 && centerCols.includes(col)
+    ? "W" // Top center(s)
+    : row === lastRow && centerCols.includes(col)
+    ? "E" // Bottom center(s)
+    : col === 0 && centerRows.includes(row)
+    ? "N" // Left center(s)
+    : col === lastCol && centerRows.includes(row)
+    ? "S"
+    : ""; // Right center(s)
 }
 
 export function _whatTile(x, y) {

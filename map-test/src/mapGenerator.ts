@@ -1,10 +1,16 @@
 export type TileType = 0 | 1 | 2 | 3;
 export type GameMap = TileType[][];
 
+// 1. 먼저 기본 맵 필요 10*10
+// 2. 해당 맵은 NESW 키를 가지는 빈 어레이를 가짐
+// 3. 캐릭터가 방향중 하나에 도달하면 해당 키에 맵 생성
+// 4. 맵 이동
+
 export class MapGenerator {
   private map: GameMap;
   private rows: number;
   private cols: number;
+  private gameMap: any;
 
   constructor(rows: number, cols: number, defaultTile: TileType = 0) {
     this.rows = rows;
