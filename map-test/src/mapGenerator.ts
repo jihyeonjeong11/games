@@ -1,5 +1,7 @@
 export type TileType = 0 | 1 | 2 | 3;
 export type GameMap = TileType[][];
+export type Directions = "n" | "s" | "e" | "w";
+export type MapStructure = Map<Directions, GameMap>;
 
 // 1. 먼저 기본 맵 필요 10*10
 // 2. 해당 맵은 NESW 키를 가지는 빈 어레이를 가짐

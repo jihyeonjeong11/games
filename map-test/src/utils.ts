@@ -15,7 +15,7 @@ export function getCenterCoordinates(rowCount: number, colCount: number) {
   };
 }
 
-export function isCenterTile(
+export function isReachedEndTile(
   row: number,
   col: number,
   rowCount: number,
@@ -27,13 +27,13 @@ export function isCenterTile(
   );
 
   return row === 0 && centerCols.includes(col)
-    ? "W" // Top center(s)
+    ? "w" // Top center(s)
     : row === lastRow && centerCols.includes(col)
-    ? "E" // Bottom center(s)
+    ? "e" // Bottom center(s)
     : col === 0 && centerRows.includes(row)
-    ? "N" // Left center(s)
+    ? "n" // Left center(s)
     : col === lastCol && centerRows.includes(row)
-    ? "S"
+    ? "s"
     : ""; // Right center(s)
 }
 

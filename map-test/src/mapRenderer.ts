@@ -2,7 +2,7 @@ import { TILE_H, TILE_W } from "./enums";
 import { GameCanvas } from "./gameCanvas";
 import { GameMap } from "./mapGenerator";
 import { MapPainter } from "./mapPainter";
-import { isCenterTile } from "./utils";
+import { isReachedEndTile } from "./utils";
 
 export class MapRenderer {
   constructor(private canvas: GameCanvas) {}
@@ -15,7 +15,7 @@ export class MapRenderer {
 
     for (let row = 0; row < rowCount; row++) {
       for (let col = 0; col < colCount; col++) {
-        const tile = isCenterTile(row, col, rowCount, colCount)
+        const tile = isReachedEndTile(row, col, rowCount, colCount)
           ? 3
           : gameMap[row][col];
 

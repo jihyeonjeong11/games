@@ -9,8 +9,8 @@ import { TILE_H, TILE_W } from "./enums";
 import { Direction } from "./types";
 import { Dog } from "./entities/dog";
 import { GameMap, MapGenerator } from "./mapGenerator";
-import { _whatTile, isCenterTile } from "./utils";
-import TileMap from "./TileMap";
+import { _whatTile, isReachedEndTile } from "./utils";
+import { TileMap } from "./TileMap";
 
 export class Game {
   private ctx: CanvasRenderingContext2D;
@@ -30,7 +30,7 @@ export class Game {
   constructor(canvasId: string) {
     this.mapGenerator = new MapGenerator(10, 10);
     if (!this.gameMap) this.gameMap = this.mapGenerator.getMap();
-    this.tileMap = new TileMap(this.mapGenerator.getMap());
+    this.tileMap = new TileMap();
 
     this.gameCanvas = new GameCanvas(canvasId);
     this.debugCanvas = new GameCanvas("debug");
@@ -74,7 +74,8 @@ export class Game {
       this.lastUpdateTime = timestamp;
 
       this.update(deltaTime);
-      this.render();
+
+      this.render(this.tileMap.getCurrentMap());
     }
 
     requestAnimationFrame(this.gameLoop.bind(this));
@@ -123,19 +124,28 @@ export class Game {
 
     // detect map movement
     const tileCoord = _whatTile(x, y);
-    const movementDirection = isCenterTile(
+    const isReachedEnd = isReachedEndTile(
       tileCoord.row,
       tileCoord.col,
       this.gameMap.length,
       this.gameMap[0].length
     );
 
-    if (movementDirection) {
-      const connectedMap = this.tileMap.connectMap(
-        movementDirection,
-        new MapGenerator(10, 10).getMap()
-      );
-      console.log(this.tileMap.getNeighbors(0, 0));
+    if (isReachedEnd) {
+      // const isMapGenerated = this.tileMap.getTileMap().get(isReachedEnd);
+
+      // this.tileMap.addConnectedMap(isReachedEnd);
+
+      // if (this.tileMap.getCurrentMap()) {
+      //   const playable = this.playable.getPlayable();
+      //   playable.position.x = 150;
+      //   playable.position.y = 150;
+      //   this.render(this.tileMap.getCurrentMap());
+      // }
+      const playable = this.playable.getPlayable();
+      playable.position.x = 150;
+      playable.position.y = 150;
+      const newMap = this.tileMap.move(isReachedEnd);
     } else {
       this.playable.setPlayable(newLocation);
     }
@@ -166,7 +176,7 @@ export class Game {
     ctx.font = "14px Arial";
     ctx.fillStyle = "black";
     const tileCoord = _whatTile(x, y);
-    const canMoveAnotherMap = isCenterTile(
+    const canMoveAnotherMap = isReachedEndTile(
       tileCoord.row,
       tileCoord.col,
       this.gameMap.length,
@@ -181,14 +191,14 @@ export class Game {
     );
   }
 
-  private async render(): Promise<any> {
+  private async render(mapData): Promise<void> {
     this.ctx.clearRect(
       0,
       0,
       this.gameCanvas.canvasWidth,
       this.gameCanvas.canvasHeight
     );
-    this.renderer.renderMap(this.gameMap);
+    this.renderer.renderMap(mapData);
     this.drawDebugInfo();
     this.renderer.renderPlayable(
       this.playable.getPlayable(),
