@@ -24,19 +24,19 @@ export function isReachedEndTile(
   );
 
   return row === 0 && centerCols.includes(col)
-    ? "w" // Top center(s)
+    ? "w"
     : row === lastRow && centerCols.includes(col)
-    ? "e" // Bottom center(s)
+    ? "e"
     : col === 0 && centerRows.includes(row)
-    ? "n" // Left center(s)
+    ? "n"
     : col === lastCol && centerRows.includes(row)
     ? "s"
-    : ""; // Right center(s)
+    : "";
 }
 
 export function _whatTile(x, y) {
   return {
-    row: Math.floor(x / 32),
-    col: Math.floor(y / 32),
+    col: Math.floor(x / 32),
+    row: Math.floor(y / 32),
   };
 }

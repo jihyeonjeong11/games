@@ -1,10 +1,12 @@
+type AssetListType = Record<string, string>;
+
 export class AssetLoader {
   private assets: Map<string, HTMLImageElement> = new Map();
   private loadedCount: number = 0;
   private totalCount: number = 0;
 
   constructor(
-    private assetList: { key: string; src: string }[],
+    private assetList: AssetListType[],
     private onLoadComplete: () => void
   ) {
     this.totalCount = assetList.length;

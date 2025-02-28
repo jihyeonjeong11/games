@@ -1,12 +1,23 @@
 import { VIEWPORT_HEIGHT, VIEWPORT_WIDTH } from "./constants";
+
+type CanvasType = {
+  id?: string;
+  width?: number;
+  height?: number;
+};
+
 export class Canvas {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
 
-  constructor() {
+  constructor(canvasProps: CanvasType) {
     this.canvas = document.createElement("canvas");
-    this.canvas.width = VIEWPORT_WIDTH;
-    this.canvas.height = VIEWPORT_HEIGHT;
+    if (canvasProps && canvasProps.id)
+      this.canvas.setAttribute("id", canvasProps.id);
+    this.canvas.width =
+      canvasProps && canvasProps.width ? canvasProps.width : VIEWPORT_WIDTH;
+    this.canvas.height =
+      canvasProps && canvasProps.height ? canvasProps.height : VIEWPORT_HEIGHT;
     document.body.appendChild(this.canvas);
 
     this.ctx = this.canvas.getContext("2d")!;

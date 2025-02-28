@@ -68,10 +68,11 @@ export class TileMap {
     camera: Camera,
     assetLoader: AssetLoader
   ): void {
-    const startCol = Math.floor(camera.x / TILE_SIZE);
-    const endCol = Math.ceil((camera.x + VIEWPORT_WIDTH) / TILE_SIZE);
-    const startRow = Math.floor(camera.y / TILE_SIZE);
-    const endRow = Math.ceil((camera.y + VIEWPORT_HEIGHT) / TILE_SIZE);
+    const { x, y } = camera.getCameraPosition();
+    const startCol = Math.floor(x / TILE_SIZE);
+    const endCol = Math.ceil((x + VIEWPORT_WIDTH) / TILE_SIZE);
+    const startRow = Math.floor(y / TILE_SIZE);
+    const endRow = Math.ceil((y + VIEWPORT_HEIGHT) / TILE_SIZE);
 
     // Leave this as it is for now since assets are not determined completely
     for (let row = startRow; row < endRow; row++) {
@@ -81,22 +82,22 @@ export class TileMap {
           if (typeof imageOrColor === "string") {
             ctx.fillStyle = imageOrColor;
             ctx.fillRect(
-              col * PLAYER_SIZE - camera.x,
-              row * PLAYER_SIZE - camera.y,
+              col * PLAYER_SIZE - x,
+              row * PLAYER_SIZE - y,
               PLAYER_SIZE,
               PLAYER_SIZE
             );
           } else {
             if (this.map[row][col] === 4 || this.map[row][col] === 1) {
-              // if treetrunks, draw dirt and trunk.
+              // if treetrunks or rock, draw dirt and trunk.
               ctx.drawImage(
                 assetLoader.getAsset("dirtTile")!,
                 0,
                 0,
                 PLAYER_SIZE,
                 PLAYER_SIZE,
-                col * PLAYER_SIZE - camera.x,
-                row * PLAYER_SIZE - camera.y,
+                col * PLAYER_SIZE - x,
+                row * PLAYER_SIZE - y,
                 PLAYER_SIZE,
                 PLAYER_SIZE
               );
@@ -106,8 +107,8 @@ export class TileMap {
                 0,
                 97,
                 97,
-                col * PLAYER_SIZE - camera.x,
-                row * PLAYER_SIZE - camera.y,
+                col * PLAYER_SIZE - x,
+                row * PLAYER_SIZE - y,
                 PLAYER_SIZE,
                 PLAYER_SIZE
               );
@@ -118,8 +119,8 @@ export class TileMap {
                 0,
                 PLAYER_SIZE,
                 PLAYER_SIZE,
-                col * PLAYER_SIZE - camera.x,
-                row * PLAYER_SIZE - camera.y,
+                col * PLAYER_SIZE - x,
+                row * PLAYER_SIZE - y,
                 PLAYER_SIZE,
                 PLAYER_SIZE
               );

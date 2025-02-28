@@ -13,7 +13,6 @@ export class GameEvent {
     const key = event.key.toLowerCase();
     this.keys.add(key);
 
-    // Check if Enter is pressed and trigger the interaction
     if (key === "enter" && this.interactionCallback) {
       this.interactionCallback();
     }

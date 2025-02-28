@@ -10,7 +10,6 @@ class PlayerState {
   isMoving: boolean = false;
 
   setResource(key: keyof InventoryType, amount: number) {
-    console.log("setResource");
     this.inventory[key] += amount;
   }
 
@@ -84,14 +83,15 @@ export class Player {
     camera: Camera,
     image: HTMLImageElement
   ) {
+    const { x, y } = camera.getCameraPosition();
     ctx.drawImage(
       image,
       22 * this.animation.getFrameIndex(),
       0,
       24,
       32,
-      this.playerState.position.x - camera.x,
-      this.playerState.position.y - camera.y,
+      this.playerState.position.x - x,
+      this.playerState.position.y - y,
       PLAYER_SIZE,
       PLAYER_SIZE
     );

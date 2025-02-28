@@ -7,14 +7,6 @@ export type MapDirection = "n" | "w" | "e" | "s";
 
 export type PlayerDirection = "up" | "down" | "left" | "right" | "none";
 
-export enum Direction {
-  UP = "up",
-  DOWN = "down",
-  LEFT = "left",
-  RIGHT = "right",
-  NONE = "none",
-}
-
 export type PlayableType = {
   position: Position;
   speed: number;

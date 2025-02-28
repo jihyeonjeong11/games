@@ -11,7 +11,11 @@ export class Camera {
   public x: number = 0;
   public y: number = 0;
 
-  update(position: Position) {
+  public getCameraPosition() {
+    return { x: this.x, y: this.y };
+  }
+
+  public update(position: Position) {
     this.x = Math.max(
       0,
       Math.min(
