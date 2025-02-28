@@ -17,8 +17,13 @@ export class Canvas {
     this.canvas.width =
       canvasProps && canvasProps.width ? canvasProps.width : VIEWPORT_WIDTH;
     this.canvas.height =
-      canvasProps && canvasProps.height ? canvasProps.height : VIEWPORT_HEIGHT;
+      canvasProps && canvasProps.height
+        ? canvasProps.height
+        : VIEWPORT_HEIGHT + 200;
     document.body.appendChild(this.canvas);
+
+    this.canvas.style.width = `${this.canvas.width}px`;
+    this.canvas.style.height = `${this.canvas.height}px`;
 
     this.ctx = this.canvas.getContext("2d")!;
   }

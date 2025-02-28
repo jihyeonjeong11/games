@@ -2,6 +2,8 @@ import { InventoryType, PlayerDirection, Position } from "./index";
 import { Camera } from "./camera";
 import { PLAYER_SIZE } from "./constants";
 
+class PlayerInventory {}
+
 class PlayerState {
   position: Position;
   speed: number;

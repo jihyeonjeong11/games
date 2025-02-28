@@ -2,7 +2,13 @@ import { InventoryType, PlayableType, Position } from ".";
 import { AssetLoader } from "./assetLoader";
 import { Camera } from "./camera";
 import { Canvas } from "./canvas";
-import { MAP_HEIGHT, MAP_WIDTH, MapObject } from "./constants";
+import {
+  MAP_HEIGHT,
+  MAP_WIDTH,
+  MapObject,
+  VIEWPORT_HEIGHT,
+  VIEWPORT_WIDTH,
+} from "./constants";
 import { FrameLimiter } from "./frameLimiter";
 import { GameEvent } from "./gameEvent";
 import { Player } from "./player";
@@ -54,7 +60,6 @@ class Game {
       const deltaTime = currentTime - this.lastFrameTime;
       this.lastFrameTime = currentTime;
 
-      const ctx = this.canvas.getCtx();
       const { isMoving, position } = this.player.getState();
 
       this.drawDebugInfo();
@@ -62,7 +67,15 @@ class Game {
       this.updateCharacterMovement(deltaTime);
       this.canvas.clearCanvas();
       this.camera.update(position);
+
+      // main canvas draw
+      const ctx = this.canvas.getCtx();
+      // tile map area
       this.tileMap.draw(ctx, this.camera, this.assetLoader);
+      ctx.fillStyle = "tan";
+      // ui area inventory?
+      ctx.fillRect(0, VIEWPORT_HEIGHT, VIEWPORT_WIDTH, 200);
+
       this.player.update(deltaTime, isMoving);
 
       if (isMoving) {
