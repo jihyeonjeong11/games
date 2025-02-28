@@ -10,15 +10,15 @@ import { TileMap } from "./tileMap";
 import { _whatTile } from "./utils";
 
 class Game {
-  canvas: Canvas;
-  debugCanvas: Canvas;
-  assetLoader: AssetLoader;
-  player: Player;
-  camera: Camera;
-  tileMap: TileMap;
-  gameEvent: GameEvent;
-  isLoaded: boolean = false;
-  frameLimiter: FrameLimiter;
+  private canvas: Canvas;
+  private debugCanvas: Canvas;
+  private assetLoader: AssetLoader;
+  private player: Player;
+  private camera: Camera;
+  private tileMap: TileMap;
+  private gameEvent: GameEvent;
+  private isLoaded: boolean = false;
+  private frameLimiter: FrameLimiter;
 
   private lastFrameTime: number = 0;
 

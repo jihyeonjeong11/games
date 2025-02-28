@@ -8,8 +8,8 @@ import {
 import { Position } from "./index";
 
 export class Camera {
-  public x: number = 0;
-  public y: number = 0;
+  private x: number = 0;
+  private y: number = 0;
 
   public getCameraPosition() {
     return { x: this.x, y: this.y };

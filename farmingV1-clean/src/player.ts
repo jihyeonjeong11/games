@@ -45,7 +45,6 @@ class PlayerAnimation {
 export class Player {
   private playerState: PlayerState;
   private animation: PlayerAnimation;
-  public isMoving: boolean = false;
 
   public getState() {
     return this.playerState;
