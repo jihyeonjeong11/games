@@ -132,16 +132,6 @@ export class Game {
     );
 
     if (isReachedEnd) {
-      // const isMapGenerated = this.tileMap.getTileMap().get(isReachedEnd);
-
-      // this.tileMap.addConnectedMap(isReachedEnd);
-
-      // if (this.tileMap.getCurrentMap()) {
-      //   const playable = this.playable.getPlayable();
-      //   playable.position.x = 150;
-      //   playable.position.y = 150;
-      //   this.render(this.tileMap.getCurrentMap());
-      // }
       const playable = this.playable.getPlayable();
       playable.position.x = 150;
       playable.position.y = 150;

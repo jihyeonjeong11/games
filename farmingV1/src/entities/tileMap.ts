@@ -52,6 +52,10 @@ export class TileMap {
     return this.map;
   }
 
+  public setMap(map) {
+    this.map = map;
+  }
+
   public canMoveTo(x: number, y: number): boolean {
     return x >= 0 && y >= 0 && x < this.width && y < this.height;
   }
@@ -60,9 +64,9 @@ export class TileMap {
     return (
       {
         [MapObject.DIRT]: this.assetLoader.getAsset("dirtTile")!,
-        [MapObject.STONE]: "#333",
+        [MapObject.STONE]: this.assetLoader.getAsset("rockTile"),
         [MapObject.GRASS]: this.assetLoader.getAsset("grassTile")!,
-        [MapObject.TREE]: "#666",
+        [MapObject.TREE]: this.assetLoader.getAsset("treeTrunkTile")!,
         [MapObject.WATER]: this.assetLoader.getAsset("waterTile")!,
       }[tileId] || "#000"
     );
@@ -87,17 +91,43 @@ export class TileMap {
               PLAYER_SIZE
             );
           } else {
-            ctx.drawImage(
-              imageOrColor,
-              0,
-              0,
-              PLAYER_SIZE,
-              PLAYER_SIZE,
-              col * PLAYER_SIZE - camera.x,
-              row * PLAYER_SIZE - camera.y,
-              PLAYER_SIZE,
-              PLAYER_SIZE
-            );
+            if (this.map[row][col] === 4 || this.map[row][col] === 1) {
+              // if treetrunks, draw dirt and trunk.
+              ctx.drawImage(
+                this.assetLoader.getAsset("dirtTile")!,
+                0,
+                0,
+                PLAYER_SIZE,
+                PLAYER_SIZE,
+                col * PLAYER_SIZE - camera.x,
+                row * PLAYER_SIZE - camera.y,
+                PLAYER_SIZE,
+                PLAYER_SIZE
+              );
+              ctx.drawImage(
+                imageOrColor,
+                0,
+                0,
+                97,
+                97,
+                col * PLAYER_SIZE - camera.x,
+                row * PLAYER_SIZE - camera.y,
+                PLAYER_SIZE,
+                PLAYER_SIZE
+              );
+            } else {
+              ctx.drawImage(
+                imageOrColor,
+                0,
+                0,
+                PLAYER_SIZE,
+                PLAYER_SIZE,
+                col * PLAYER_SIZE - camera.x,
+                row * PLAYER_SIZE - camera.y,
+                PLAYER_SIZE,
+                PLAYER_SIZE
+              );
+            }
           }
         }
       }

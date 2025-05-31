@@ -3,7 +3,7 @@ import { GameEvent } from "./application/gameEvent";
 import { AssetLoader } from "./data-access/assetLoader";
 import { Camera } from "./entities/camera";
 import { PlayableType, Player } from "./entities/player";
-import { TileMap } from "./entities/tileMap";
+import { MapObject, TileMap } from "./entities/tileMap";
 import { _whatTile, isReachedEndTile } from "./utils";
 import {
   DEV_FPS,
@@ -17,6 +17,7 @@ import { Direction } from "./utils/types";
 
 export class Game {
   canvas: Canvas;
+  debugCanvas: HTMLCanvasElement;
   assetLoader: AssetLoader;
   isLoaded: boolean = false;
   map: TileMap;
@@ -27,9 +28,11 @@ export class Game {
   constructor() {
     this.canvas = new Canvas();
     this.gameEvent = new GameEvent();
+    this.gameEvent.onInteraction(this.gatherResources.bind(this));
+    this.debugCanvas = document.getElementById("debug") as HTMLCanvasElement;
 
     this.player = new Player(1, 1);
-    this.camera = new Camera(this.player);
+    this.camera = new Camera();
 
     this.assetLoader = new AssetLoader(
       [
@@ -38,6 +41,8 @@ export class Game {
         { key: "grassTile", src: "assets/backgrounds/Grass.png" },
         { key: "waterTile", src: "assets/backgrounds/Water.png" },
         { key: "dirtTile", src: "assets/backgrounds/Sand.png" },
+        { key: "treeTrunkTile", src: "assets/objects/Trunk.png" },
+        { key: "rockTile", src: "assets/objects/Rock.png" },
       ],
       () => {
         this.isLoaded = true;
@@ -57,6 +62,33 @@ export class Game {
       () => requestAnimationFrame((time) => this.gameLoop(time)),
       1000 / DEV_FPS
     );
+  }
+
+  private gatherResources() {
+    const currentTile = _whatTile(
+      this.player.getPlayable().position.x,
+      this.player.getPlayable().position.y
+    );
+
+    const mapData = this.map.getMap();
+    const tileValue = mapData[currentTile.col][currentTile.row];
+
+    // Create a mapping for gatherable tiles:
+    const gatherableTiles: {
+      [key: number]: { resource: string; newTile: number };
+    } = {
+      [MapObject.STONE]: { resource: "stone", newTile: MapObject.DIRT },
+      [MapObject.TREE]: { resource: "wood", newTile: MapObject.DIRT },
+    };
+
+    const action = gatherableTiles[tileValue];
+    if (action) {
+      // Update the tile and add the corresponding resource to the player.
+      const newMap = this.map.getMap();
+      newMap[currentTile.col][currentTile.row] = action.newTile;
+      this.player.setResource(action.resource, 1);
+      this.map.setMap(newMap);
+    }
   }
 
   private updateCharacterMovement(deltaTime: number): void {
@@ -100,10 +132,28 @@ export class Game {
       this.map.getMap().length,
       this.map.getMap()[0].length
     );
-    if (isReachedEnd) {
-    } else {
+    if (!isReachedEnd) {
       this.player.setPlayable(newLocation);
     }
+  }
+
+  private drawDebugInfo(): void {
+    const { x, y } = this.player.getPlayable().position;
+    const ctx = this.debugCanvas.getContext("2d")!;
+    ctx.clearRect(0, 0, 400, 50);
+    ctx.font = "14px Arial";
+    ctx.fillStyle = "black";
+    const tileCoord = _whatTile(x, y);
+
+    ctx.fillText(
+      `X: ${Math.floor(x)}, Y: ${Math.floor(y)}, whatTile ${
+        MapObject[this.map.getMap()[tileCoord.col][tileCoord.row]]
+      }, wood: ${this.player.inventory.wood} , stone: ${
+        this.player.inventory.stone
+      }`,
+      15,
+      25
+    );
   }
 
   private gameLoop(currentTime) {
@@ -113,9 +163,10 @@ export class Game {
     // this.player.update(deltaTime);
     this.updateCharacterMovement(deltaTime);
 
-    this.camera.update();
+    this.drawDebugInfo();
+    this.camera.update(this.player.getPlayable().position);
     this.map.draw(this.canvas.getCtx(), this.camera);
-    this.player.update(currentTime);
+    this.player.update(currentTime, this.player.getPlayable().isMoving);
 
     if (this.player.getPlayable().isMoving) {
       this.player.draw(

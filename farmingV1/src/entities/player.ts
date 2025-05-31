@@ -1,8 +1,6 @@
-import { AssetLoader } from "../data-access/assetLoader";
 import { PLAYER_SIZE } from "../utils/constants";
 import { Direction, Position } from "../utils/types";
 import { Camera } from "./camera";
-import { TileMap } from "./tileMap";
 
 export type PlayableType = {
   position: Position;
@@ -11,11 +9,21 @@ export type PlayableType = {
   isMoving: boolean;
 };
 
+export type InventoryType = {
+  wood: number;
+  stone: number;
+};
+
 export class Player {
   private playable: PlayableType;
   position: Position;
   speed: number;
   direction: Direction;
+  inventory: InventoryType = {
+    wood: 0,
+    stone: 0,
+  };
+  tree: number = 0;
   public isMoving: boolean = false;
 
   x: number;
@@ -23,6 +31,7 @@ export class Player {
 
   private frameIndex: number = 0;
   private frameCount: number = 9; // 총 9 프레임
+  private walkingFrameCount: number = 5;
   private frameWidth: number = 24;
   private frameHeight: number = 32;
   private frameDuration: number = 100; // 0.1초마다 프레임 변경
@@ -48,37 +57,26 @@ export class Player {
     this.playable = { ...this.playable, ...object };
   }
 
-  public update(deltaTime: number) {
+  public update(deltaTime: number, isMoving: boolean) {
+    const frameCount = isMoving ? this.walkingFrameCount : this.frameCount;
     // 0.1초마다 프레임 변경
     this.lastFrameTime += deltaTime;
     if (this.lastFrameTime >= this.frameDuration) {
-      this.frameIndex = (this.frameIndex + 1) % this.frameCount;
+      this.frameIndex = (this.frameIndex + 1) % frameCount;
       this.lastFrameTime = 0;
     }
 
     this.isMoving = false;
   }
 
-  // varies to handleInteraction
-  move(key: string, tileMap: TileMap): void {
-    const xCoord = this.x + (key === "a" ? -1 : key === "d" ? 1 : 0);
-    const yCoord = this.y + (key === "w" ? -1 : key === "s" ? 1 : 0);
-    if (key === "a" || key === "d" || key === "w" || key === "s") {
-      this.isMoving = true;
-    }
-    if (tileMap.canMoveTo(xCoord, yCoord)) {
-      this.x = xCoord;
-      this.y = yCoord;
-    }
+  public setResource(key, number) {
+    this.inventory = {
+      ...this.inventory,
+      [key]: (this.inventory[key] += number),
+    };
   }
 
-  public draw(
-    ctx: CanvasRenderingContext2D,
-    assetLoader: AssetLoader,
-    camera: Camera,
-    image
-  ) {
-    console.log(image);
+  public draw(ctx: CanvasRenderingContext2D, camera: Camera, image) {
     ctx.drawImage(
       image,
       22 * this.frameIndex,

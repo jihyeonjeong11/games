@@ -2,6 +2,7 @@ import { Direction } from "../utils/types";
 
 export class GameEvent {
   private keys: Set<string> = new Set();
+  private interactionCallback: (() => void) | null = null;
 
   constructor() {
     window.addEventListener("keydown", this.handleKeyDown.bind(this));
@@ -9,7 +10,13 @@ export class GameEvent {
   }
 
   private handleKeyDown(event: KeyboardEvent): void {
-    this.keys.add(event.key.toLowerCase());
+    const key = event.key.toLowerCase();
+    this.keys.add(key);
+
+    // Check if Enter is pressed and trigger the interaction
+    if (key === "enter" && this.interactionCallback) {
+      this.interactionCallback();
+    }
   }
 
   private handleKeyUp(event: KeyboardEvent): void {
@@ -30,5 +37,9 @@ export class GameEvent {
     if (this.isKeyPressed("d") || this.isKeyPressed("arrowright"))
       return Direction.RIGHT;
     return Direction.NONE;
+  }
+
+  onInteraction(callback: () => void): void {
+    this.interactionCallback = callback;
   }
 }

@@ -39,7 +39,7 @@ export function isReachedEndTile(
 
 export function _whatTile(x, y) {
   return {
-    row: Math.floor(x / TILE_W),
-    col: Math.floor(y / TILE_H),
+    row: Math.floor(x / 32),
+    col: Math.floor(y / 32),
   };
 }
