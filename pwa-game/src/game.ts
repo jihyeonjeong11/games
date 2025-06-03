@@ -53,6 +53,7 @@ export let gameState: "start" | "pause" = "pause";
 let currentY = 0;
 let currentX = 3;
 let currentBlock: null | (typeof tetrominos)[keyof typeof tetrominos] = null;
+let freezed = false;
 
 function drawBlock(canvas: HTMLCanvasElement, x: number, y: number) {
   let ctx = canvas.getContext("2d")!;
@@ -60,7 +61,7 @@ function drawBlock(canvas: HTMLCanvasElement, x: number, y: number) {
   ctx.strokeRect(BLOCK_W * x, BLOCK_H * y, BLOCK_W - 1, BLOCK_H - 1);
 }
 
-function createBoard() {
+function generateNewBoard() {
   const newBoard: number[][] = [];
   for (let y = 0; y < ROWS; ++y) {
     newBoard.push([]);
@@ -68,7 +69,7 @@ function createBoard() {
       newBoard[y].push(0);
     }
   }
-  return newBoard;
+  board = newBoard;
 }
 
 function getRandomTetromino() {
@@ -84,85 +85,115 @@ function freezeCurrentPiece() {
   currentY = 0;
 }
 
-export function tick(currentTime: number) {
+function generateNewTetromino() {
+  currentBlock = getRandomTetromino();
+  currentX = 3;
+  currentY = 0;
+}
+
+function render() {
   const canvas = document.querySelector<HTMLCanvasElement>("#game-canvas")!;
+
+  let ctx = canvas.getContext("2d")!;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // testing grid line
+  drawGrid(canvas);
+
+  ctx.strokeStyle = "black";
+
+  // todo: draw freezed blocks
+
+  // current draw
+  for (let y = 0; y < board.length; ++y) {
+    for (let x = 0; x < board[y].length; ++x) {
+      if (board[y][x]) {
+        ctx.fillStyle = colors[board[y][x] - 1];
+        drawBlock(canvas, x, y);
+      }
+    }
+  }
+}
+
+function isValidMove(offsetX, offsetY, newCurrent) {
+  offsetX = offsetX || 0;
+  offsetY = offsetY || 0;
+  offsetX = currentX + offsetX;
+  offsetY = currentY + offsetY;
+  newCurrent = newCurrent || currentBlock;
+  console.log(newCurrent);
+
+  for (var y = 0; y < 3; ++y) {
+    for (var x = 0; x < 3; ++x) {
+      if (newCurrent[y][x]) {
+        if (
+          typeof board[y + offsetY] == "undefined" ||
+          typeof board[y + offsetY][x + offsetX] == "undefined" ||
+          board[y + offsetY][x + offsetX] ||
+          x + offsetX < 0 ||
+          y + offsetY >= ROWS ||
+          x + offsetX >= COLS
+        ) {
+          if (offsetY == 1 && freezed) {
+            lose = true; // lose if the current shape is settled at the top most row
+            // document.getElementById('playbutton').disabled = false;
+          }
+          return false;
+        }
+      }
+    }
+  }
+  return true;
+}
+
+export function tick(currentTime: number) {
   // interval 1000
   if (!(currentTime >= lastTime + 1000)) {
     raf = requestAnimationFrame(tick);
   } else {
     lastTime = currentTime;
-    let newBoard = [];
-    // 보드 없을 때
-    if (!board.length) {
-      newBoard = createBoard();
-    } else {
-      // 없다면 이전 데이터 사용
-      newBoard = board;
-    }
-    // 새 블락 생성
-    if (!currentBlock) {
-      currentBlock = getRandomTetromino();
-      for (let i = 0; i < currentBlock.length; i++) {
-        for (let j = 0; j < currentBlock[i].length; j++) {
-          const row = currentBlock[i];
-          if (row[j]) {
-            newBoard[i + currentY][j + currentX] = 1;
-          }
-        }
-      }
 
-      // 블락 내려감 이전 보드 내용 지우기
-    } else {
-      // 1. 1칸 다운
+    if (isValidMove(0, 1, currentBlock)) {
       currentY++;
-      // 2. 끝에 도달했다면 내리고 끝
-      if (currentY >= 19) {
-        freezeCurrentPiece();
-        // 3. 부딪힌다면 안내리고 끝
-      } else {
-        // 1. Clear previous block position
-        for (let i = 0; i < board.length && i <= currentY; i++) {
-          for (let j = 0; j < board[i].length; j++) {
-            newBoard[i][j] = 0;
-          }
-        }
-
-        // 2. Redraw block in new position
-        for (let i = 0; i < currentBlock.length; i++) {
-          for (let j = 0; j < currentBlock[i].length; j++) {
-            if (currentBlock[i][j]) {
-              newBoard[currentY + i][currentX + j] = 1;
-            }
-          }
-        }
-      }
+      console.log("safe");
+    } else {
+      console.log("fail");
     }
+    let newBoard = board;
 
-    // 3. when collide currentY row has 1 value
-    // newPosition에 1이 있을 경우 멈춤. 혹은 20 넘어갈 경우 멈춤
+    // // 1. 1칸 다운
+    // currentY++;
+    // // 2. 끝에 도달했다면 내리고 끝
+    // if (currentY >= 19) {
+    //   freezeCurrentPiece();
+    //   // 3. 부딪힌다면 안내리고 끝
+    // } else {
+    //   // 1. Clear previous block position
+    //   for (let i = 0; i < board.length && i <= currentY; i++) {
+    //     for (let j = 0; j < board[i].length; j++) {
+    //       newBoard[i][j] = 0;
+    //     }
+    //   }
 
-    // 3. when collide
+    //   // 2. Redraw block in new position
+    //   for (let i = 0; i < currentBlock.length; i++) {
+    //     for (let j = 0; j < currentBlock[i].length; j++) {
+    //       if (currentBlock[i][j]) {
+    //         newBoard[currentY + i][currentX + j] = 1;
+    //       }
+    //     }
+    //   }
+    // }
 
-    // 다 끝났다면 리드로우
+    // // 3. when collide currentY row has 1 value
+    // // newPosition에 1이 있을 경우 멈춤. 혹은 20 넘어갈 경우 멈춤
 
-    board = newBoard;
+    // // 3. when collide
 
-    let ctx = canvas.getContext("2d")!;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // // 다 끝났다면 리드로우
 
-    // testing grid line
-    drawGrid(canvas);
-
-    ctx.strokeStyle = "black";
-    // board redraw
-    for (let y = 0; y < board.length; ++y) {
-      for (let x = 0; x < board[y].length; ++x) {
-        if (board[y][x]) {
-          ctx.fillStyle = colors[board[y][x] - 1];
-          drawBlock(canvas, x, y);
-        }
-      }
-    }
+    // board = newBoard;
+    render();
 
     raf = requestAnimationFrame(tick);
   }
@@ -174,7 +205,11 @@ export function toggleGame(state: "start" | "pause") {
 
 export function newGame() {
   // todo: clear existing rafs
-  // todo:
+  // todo: createboard
+  // todo: createNewShape
+  generateNewBoard();
+  generateNewTetromino();
+  render();
   raf = requestAnimationFrame(tick);
 }
 
