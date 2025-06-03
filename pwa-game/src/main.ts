@@ -1,45 +1,23 @@
-import './style.css'
-import typescriptLogo from './typescript.svg'
-import appLogo from '/favicon.svg'
-import { setupCounter } from './counter.ts'
-import { initPWA } from './pwa.ts'
+import "./style.css";
+// import typescriptLogo from "./typescript.svg";
+// import appLogo from "/favicon.svg";
+import { initPWA } from "./pwa.ts";
+import { drawGrid } from "./drawGrid.ts";
+import { game } from "./game.ts";
 
-const app = document.querySelector<HTMLDivElement>('#app')!
+const app = document.querySelector<HTMLDivElement>("#app")!;
 app.innerHTML = `
   <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="${appLogo}" class="logo" alt="App logo" />
-    </a>
-    <a href="https://www.typescriptlang.org/" target="_blank">
-      <img src="${typescriptLogo}" class="logo vanilla" alt="TypeScript logo" />
-    </a>
-    <h1>pwa-game</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite and TypeScript logos to learn more
-    </p>
-  </div>
-  <div
-    id="pwa-toast"
-    role="alert"
-    aria-labelledby="toast-message"
-  >
-    <div class="message">
-      <span id="toast-message"></span>
-    </div>
-    <div class="buttons">
-        <button id="pwa-refresh" type="button">
-          Reload
-        </button>
-        <button id="pwa-close" type="button">
-          Close
-        </button>
+    <h1>Tetris</h1>
+    <div class="container">
+      <outcome>Score: 0</outcome>
+      <canvas width='320' height='640' id="game-canvas"></canvas>
     </div>
   </div>
-`
+`;
 
-setupCounter(document.querySelector<HTMLButtonElement>('#counter')!)
+// testing purpose grid
+drawGrid(document.querySelector<HTMLCanvasElement>("#game-canvas")!);
 
-initPWA(app)
+game(document.querySelector<HTMLCanvasElement>("#game-canvas")!);
+initPWA(app);

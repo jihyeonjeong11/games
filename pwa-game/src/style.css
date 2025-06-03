@@ -131,3 +131,16 @@ button#pwa-refresh {
 #pwa-toast.show.refresh button#pwa-refresh {
   display: block;
 }
+
+canvas {
+  width: 320px;
+  height: 640px;
+  border: solid 1px black;
+  background-color: tan;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
