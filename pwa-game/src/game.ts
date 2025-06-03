@@ -44,6 +44,8 @@ const tetrominos = {
   ],
 } as const;
 
+const colors = ["cyan", "orange", "blue", "yellow", "red", "green", "purple"];
+
 let raf: any = null;
 let lastTime = 0;
 
@@ -54,7 +56,6 @@ let currentBlock: null | (typeof tetrominos)[keyof typeof tetrominos] = null;
 
 function drawBlock(canvas: HTMLCanvasElement, x: number, y: number) {
   let ctx = canvas.getContext("2d")!;
-
   ctx.fillRect(BLOCK_W * x, BLOCK_H * y, BLOCK_W - 1, BLOCK_H - 1);
   ctx.strokeRect(BLOCK_W * x, BLOCK_H * y, BLOCK_W - 1, BLOCK_H - 1);
 }
@@ -67,17 +68,28 @@ function createBoard() {
       newBoard[y].push(0);
     }
   }
-  console.log(newBoard);
   return newBoard;
 }
 
-const colors = ["cyan", "orange", "blue", "yellow", "red", "green", "purple"];
+function getRandomTetromino() {
+  const keys = Object.keys(tetrominos);
+  const random = keys[
+    Math.floor(Math.random() * keys.length)
+  ] as keyof typeof tetrominos;
+  return tetrominos[random];
+}
 
-export function game(currentTime: number) {
+function freezeCurrentPiece() {
+  currentBlock = null;
+  currentY = 0;
+}
+
+export function tick(currentTime: number) {
   const canvas = document.querySelector<HTMLCanvasElement>("#game-canvas")!;
-
-  if (currentTime >= lastTime + 1000) {
-    // one second has passed, run some code here
+  // interval 1000
+  if (!(currentTime >= lastTime + 1000)) {
+    raf = requestAnimationFrame(tick);
+  } else {
     lastTime = currentTime;
     let newBoard = [];
     // 보드 없을 때
@@ -87,28 +99,25 @@ export function game(currentTime: number) {
       // 없다면 이전 데이터 사용
       newBoard = board;
     }
-
     // 새 블락 생성
     if (!currentBlock) {
-      currentBlock = tetrominos["T"];
+      currentBlock = getRandomTetromino();
       for (let i = 0; i < currentBlock.length; i++) {
         for (let j = 0; j < currentBlock[i].length; j++) {
           const row = currentBlock[i];
           if (row[j]) {
-            console.table(board);
             newBoard[i + currentY][j + currentX] = 1;
           }
         }
       }
+
       // 블락 내려감 이전 보드 내용 지우기
     } else {
       // 1. 1칸 다운
       currentY++;
-
       // 2. 끝에 도달했다면 내리고 끝
       if (currentY >= 19) {
-        currentBlock = null;
-        currentY = 0;
+        freezeCurrentPiece();
         // 3. 부딪힌다면 안내리고 끝
       } else {
         // 1. Clear previous block position
@@ -154,11 +163,8 @@ export function game(currentTime: number) {
         }
       }
     }
-    if (gameState === "start") {
-      raf = requestAnimationFrame(game);
-    }
-  } else {
-    raf = requestAnimationFrame(game);
+
+    raf = requestAnimationFrame(tick);
   }
 }
 
@@ -167,9 +173,19 @@ export function toggleGame(state: "start" | "pause") {
 }
 
 export function newGame() {
-  if (gameState === "start") return;
-  gameState = "start";
-  raf = requestAnimationFrame(game);
+  // todo: clear existing rafs
+  // todo:
+  raf = requestAnimationFrame(tick);
+}
+
+export function playButtonClick() {
+  const button = document.querySelector("#button-start") as HTMLButtonElement;
+  button.disabled = true;
+  newGame();
+}
+
+export function pause() {
+  console.log(pause);
 }
 
 // 게임 시작 스테이트

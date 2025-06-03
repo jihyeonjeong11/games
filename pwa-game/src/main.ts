@@ -2,8 +2,7 @@ import "./style.css";
 // import typescriptLogo from "./typescript.svg";
 // import appLogo from "/favicon.svg";
 import { initPWA } from "./pwa.ts";
-import { drawGrid } from "./drawGrid.ts";
-import { game, toggleGame, gameState, newGame } from "./game.ts";
+import { toggleGame, playButtonClick, pause } from "./game.ts";
 
 const app = document.querySelector<HTMLDivElement>("#app")!;
 app.innerHTML = `
@@ -23,13 +22,9 @@ app.innerHTML = `
 const startButton = document.querySelector("#button-start");
 const stopButton = document.querySelector("#button-stop");
 
-startButton?.addEventListener("click", () => {
-  newGame();
-});
+startButton?.addEventListener("click", playButtonClick);
 
-stopButton?.addEventListener("click", () => {
-  toggleGame("pause");
-});
+stopButton?.addEventListener("click", pause);
 
 // testing purpose grid
 //game(document.querySelector<HTMLCanvasElement>("#game-canvas")!);
