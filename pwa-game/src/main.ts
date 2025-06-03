@@ -3,21 +3,35 @@ import "./style.css";
 // import appLogo from "/favicon.svg";
 import { initPWA } from "./pwa.ts";
 import { drawGrid } from "./drawGrid.ts";
-import { game } from "./game.ts";
+import { game, toggleGame, gameState, newGame } from "./game.ts";
 
 const app = document.querySelector<HTMLDivElement>("#app")!;
 app.innerHTML = `
   <div>
     <h1>Tetris</h1>
     <div class="container">
-      <outcome>Score: 0</outcome>
+      <div class="controls">
+        <outcome>Score: 0</outcome>
+        <button id="button-start"><span>Start</span></button>
+        <button id="button-stop"><span>Pause</span></button>
+      </div>
       <canvas width='320' height='640' id="game-canvas"></canvas>
     </div>
   </div>
 `;
 
-// testing purpose grid
-drawGrid(document.querySelector<HTMLCanvasElement>("#game-canvas")!);
+const startButton = document.querySelector("#button-start");
+const stopButton = document.querySelector("#button-stop");
 
-game(document.querySelector<HTMLCanvasElement>("#game-canvas")!);
+startButton?.addEventListener("click", () => {
+  newGame();
+});
+
+stopButton?.addEventListener("click", () => {
+  toggleGame("pause");
+});
+
+// testing purpose grid
+//game(document.querySelector<HTMLCanvasElement>("#game-canvas")!);
+
 initPWA(app);

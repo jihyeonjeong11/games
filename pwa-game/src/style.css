@@ -144,3 +144,14 @@ canvas {
   flex-direction: column;
   gap: 2rem;
 }
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  button {
+    background-color: none;
+    outline: none;
+  }
+}
