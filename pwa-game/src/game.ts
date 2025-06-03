@@ -101,15 +101,23 @@ function render() {
   drawGrid(canvas);
 
   ctx.strokeStyle = "black";
-
-  // todo: draw freezed blocks
-
-  // current draw
-  for (let y = 0; y < board.length; ++y) {
-    for (let x = 0; x < board[y].length; ++x) {
+  ctx.strokeStyle = "black";
+  for (var x = 0; x < COLS; ++x) {
+    for (var y = 0; y < ROWS; ++y) {
       if (board[y][x]) {
         ctx.fillStyle = colors[board[y][x] - 1];
         drawBlock(canvas, x, y);
+      }
+    }
+  }
+
+  ctx.fillStyle = "red";
+  ctx.strokeStyle = "black";
+  for (var y = 0; y < 3; ++y) {
+    for (var x = 0; x < 3; ++x) {
+      if (currentBlock[y][x]) {
+        ctx.fillStyle = colors[currentBlock[y][x] - 1];
+        drawBlock(canvas, currentX + x, currentY + y);
       }
     }
   }
