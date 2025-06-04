@@ -2,7 +2,7 @@ import "./style.css";
 // import typescriptLogo from "./typescript.svg";
 // import appLogo from "/favicon.svg";
 import { initPWA } from "./pwa.ts";
-import { toggleGame, playButtonClick, pause } from "./game.ts";
+import { toggleGame, playButtonClick, pause, newGameTest } from "./game.ts";
 
 const app = document.querySelector<HTMLDivElement>("#app")!;
 app.innerHTML = `
@@ -10,7 +10,7 @@ app.innerHTML = `
     <h1>Tetris</h1>
     <div class="container">
       <div class="controls">
-        <outcome>Score: 0</outcome>
+        <outcome id="score">Score: 0</outcome>
         <button id="button-start"><span>Start</span></button>
         <button id="button-stop"><span>Pause</span></button>
       </div>

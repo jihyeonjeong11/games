@@ -1,3 +1,5 @@
+// todo: 펑션들 전부 param 받는 식으로 가기
+// todo: currentTetrimino 이름 좀더 테트리스스럽게 바꾸기
 import { drawGrid } from "./drawGrid";
 
 const COLS = 10,
@@ -47,13 +49,20 @@ const tetrominos = {
 const colors = ["cyan", "orange", "blue", "yellow", "red", "green", "purple"];
 
 let raf: any = null;
-let lastTime = 0;
 
 export let gameState: "start" | "pause" = "pause";
 let currentY = 0;
 let currentX = 3;
-let currentBlock: null | (typeof tetrominos)[keyof typeof tetrominos] = null;
-let freezed = false;
+// 스태틱한 피스, 회전한 피스 타입 두가지
+type CurrentTetrominoType =
+  | null
+  | (typeof tetrominos)[keyof typeof tetrominos]
+  | number[][];
+
+let currentTetrimino: CurrentTetrominoType = null;
+let gameOver = false;
+let count = 0;
+export let score = 0;
 
 function drawBlock(canvas: HTMLCanvasElement, x: number, y: number) {
   let ctx = canvas.getContext("2d")!;
@@ -81,14 +90,51 @@ function getRandomTetromino() {
 }
 
 function freezeCurrentPiece() {
-  currentBlock = null;
+  if (!currentTetrimino) return;
+  for (var y = 0; y < currentTetrimino.length; ++y) {
+    for (var x = 0; x < currentTetrimino[0].length; ++x) {
+      if (currentTetrimino[y][x]) {
+        board[y + currentY][x + currentX] = currentTetrimino[y][x];
+      }
+    }
+  }
+  currentTetrimino = null;
   currentY = 0;
 }
 
 function generateNewTetromino() {
-  currentBlock = getRandomTetromino();
+  currentTetrimino = getRandomTetromino();
   currentX = 3;
   currentY = 0;
+  // todo: SOC
+  if (!isValidMove(currentTetrimino, currentX, currentY)) {
+    showGameOver();
+  }
+}
+
+function showGameOver() {
+  cancelAnimationFrame(raf);
+  updateScoreDisplay(0);
+
+  const button = document.querySelector("#button-start") as HTMLButtonElement;
+  button.disabled = false;
+}
+
+function updateScoreDisplay(score: number) {
+  const scoreDisplay = document.querySelector<HTMLElement>("#score");
+  if (scoreDisplay) scoreDisplay.textContent = `Score: ${score}`;
+}
+
+function clearLineForScore() {
+  for (let i = 0; i < board.length; i++) {
+    if (board[i].every((e) => e)) {
+      board.splice(i, 1); // Remove the filled row
+      board.unshift(new Array(COLS).fill(0)); // Add an empty row at the top
+      score++;
+      updateScoreDisplay(score);
+      i++; // Re-check the same index after shifting
+    }
+  }
 }
 
 function render() {
@@ -100,10 +146,8 @@ function render() {
   // testing grid line
   drawGrid(canvas);
 
-  ctx.strokeStyle = "black";
-  ctx.strokeStyle = "black";
-  for (var x = 0; x < COLS; ++x) {
-    for (var y = 0; y < ROWS; ++y) {
+  for (let x = 0; x < COLS; x++) {
+    for (let y = 0; y < ROWS; y++) {
       if (board[y][x]) {
         ctx.fillStyle = colors[board[y][x] - 1];
         drawBlock(canvas, x, y);
@@ -111,74 +155,61 @@ function render() {
     }
   }
 
-  ctx.fillStyle = "red";
-  ctx.strokeStyle = "black";
-  for (var y = 0; y < 3; ++y) {
-    for (var x = 0; x < 3; ++x) {
-      if (currentBlock[y][x]) {
-        ctx.fillStyle = colors[currentBlock[y][x] - 1];
-        drawBlock(canvas, currentX + x, currentY + y);
+  if (currentTetrimino) {
+    for (let y = 0; y < currentTetrimino.length; ++y) {
+      for (let x = 0; x < currentTetrimino[0].length; ++x) {
+        if (currentTetrimino[y][x]) {
+          ctx.fillStyle = colors[currentTetrimino[y][x] - 1];
+          drawBlock(canvas, currentX + x, currentY + y);
+        }
       }
     }
   }
 }
 
-function isValidMove(offsetX, offsetY, newCurrent) {
-  // todo: collision check
-  // https://harddrop.com/wiki/SRS
+// currentPiece, currentX, currentY
+function isValidMove(
+  current: CurrentTetrominoType,
+  desiredX: number,
+  desiredY: number
+  // 방향 체크가 필요한지?
+) {
+  if (!current) return false;
+  // 1. 피스 전체 for loop 두개
+  for (let y = 0; y < current.length; y++) {
+    for (let x = 0; x < current[0].length; x++) {
+      if (current[y][x]) {
+        if (
+          // 보드 바깥인지
+          desiredY + y >= board.length ||
+          desiredX + x >= board[0].length ||
+          desiredX + x < 0 ||
+          // 다른 조각과 부딪히는지
+          board[desiredY + y][desiredX + x]
+        ) {
+          return false;
+        }
+      }
+    }
+  }
   return true;
 }
 
-export function tick(currentTime: number) {
-  // interval 1000
-  if (!(currentTime >= lastTime + 1000)) {
-    raf = requestAnimationFrame(tick);
-  } else {
-    lastTime = currentTime;
+export function loop() {
+  raf = requestAnimationFrame(loop);
 
-    if (isValidMove(0, 1, currentBlock)) {
+  // 35 프레임 이후 테트리스 피스 한칸 다운
+  if (++count > 35) {
+    count = 0;
+
+    if (isValidMove(currentTetrimino, currentX, currentY + 1)) {
       currentY++;
-      console.log("safe");
     } else {
-      console.log("fail");
+      freezeCurrentPiece();
+      generateNewTetromino();
     }
-    let newBoard = board;
-
-    // // 1. 1칸 다운
-    // currentY++;
-    // // 2. 끝에 도달했다면 내리고 끝
-    // if (currentY >= 19) {
-    //   freezeCurrentPiece();
-    //   // 3. 부딪힌다면 안내리고 끝
-    // } else {
-    //   // 1. Clear previous block position
-    //   for (let i = 0; i < board.length && i <= currentY; i++) {
-    //     for (let j = 0; j < board[i].length; j++) {
-    //       newBoard[i][j] = 0;
-    //     }
-    //   }
-
-    //   // 2. Redraw block in new position
-    //   for (let i = 0; i < currentBlock.length; i++) {
-    //     for (let j = 0; j < currentBlock[i].length; j++) {
-    //       if (currentBlock[i][j]) {
-    //         newBoard[currentY + i][currentX + j] = 1;
-    //       }
-    //     }
-    //   }
-    // }
-
-    // // 3. when collide currentY row has 1 value
-    // // newPosition에 1이 있을 경우 멈춤. 혹은 20 넘어갈 경우 멈춤
-
-    // // 3. when collide
-
-    // // 다 끝났다면 리드로우
-
-    // board = newBoard;
+    clearLineForScore();
     render();
-
-    raf = requestAnimationFrame(tick);
   }
 }
 
@@ -187,13 +218,12 @@ export function toggleGame(state: "start" | "pause") {
 }
 
 export function newGame() {
-  // todo: clear existing rafs
-  // todo: createboard
-  // todo: createNewShape
+  cancelAnimationFrame(raf);
+  document.addEventListener("keydown", keyboardEvent);
   generateNewBoard();
   generateNewTetromino();
   render();
-  raf = requestAnimationFrame(tick);
+  raf = requestAnimationFrame(loop);
 }
 
 export function playButtonClick() {
@@ -202,14 +232,78 @@ export function playButtonClick() {
   newGame();
 }
 
+// 90% 시계방향
+function rotate(current: CurrentTetrominoType) {
+  if (!current) return null;
+  let newCurrent: number[][] = [];
+  for (let y = 0; y < current.length; ++y) {
+    newCurrent[y] = [];
+    for (let x = 0; x < current[0].length; ++x) {
+      newCurrent[y][x] = current[current.length - 1 - x][y];
+    }
+  }
+
+  return newCurrent;
+}
+
+function keyboardEvent(event: KeyboardEvent) {
+  event.preventDefault();
+  // 회전, 움직임
+  // todo: switch them to switch()
+  if (event.code === "ArrowLeft") {
+    // todo: move left
+    if (isValidMove(currentTetrimino, currentX - 1, currentY)) {
+      currentX--;
+    } else {
+      console.log("not happening");
+    }
+  }
+  if (event.code === "ArrowRight") {
+    // todo: move right
+    if (isValidMove(currentTetrimino, currentX + 1, currentY)) {
+      currentX++;
+    } else {
+      console.log("not happening");
+    }
+  }
+  if (event.code === "ArrowDown") {
+    // todo: go down to bottom and freeze
+    if (isValidMove(currentTetrimino, currentX, currentY + 1)) {
+      currentY++;
+    } else {
+      console.log("freeze happens");
+      freezeCurrentPiece();
+      generateNewTetromino();
+    }
+  }
+  if (event.code === "ArrowUp") {
+    // todo: rotate
+    const test = rotate(currentTetrimino);
+    currentTetrimino = test;
+  }
+  render();
+}
+
+export function newGameTest() {
+  // SRS 로직 시작
+  document.addEventListener("keydown", keyboardEvent);
+
+  generateNewBoard();
+  generateNewTetromino();
+  render();
+}
+
 export function pause() {
   console.log(pause);
 }
 
-// 게임 시작 스테이트
-// interval 시작.
-// 클리어캔서브
-// 랜덤 피스 생성 후 드로우
-// 1초에 한번씩 내려옴.
-// 끝에 달하면 움직임 정지
-// 다시 랜덤 피스 생성
+// 충돌, 회전 로직
+
+// method 1: 직접 하나하나 좌표 계산
+// https://www.reddit.com/r/programminghorror/comments/f7ym4a/how_to_do_tetris_collision_detection_in_only_800/
+
+// method 2: Standard Rotation System
+// https://harddrop.com/wiki/SRS
+
+// todo: 부품 색깔
+// todo: pause?
