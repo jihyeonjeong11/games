@@ -2,11 +2,14 @@
 // todo: currentTetrimino 이름 좀더 테트리스스럽게 바꾸기
 import { drawGrid } from "./drawGrid";
 
+const WIDTH = 320;
+const HEIGHT = 640;
+
 const COLS = 10,
   ROWS = 20;
 let board: number[][] = [];
-const BLOCK_W = 320 / COLS,
-  BLOCK_H = 640 / ROWS;
+const BLOCK_W = WIDTH / COLS,
+  BLOCK_H = HEIGHT / ROWS;
 
 const tetrominos = {
   I: [
@@ -59,6 +62,7 @@ type CurrentTetrominoType =
   | (typeof tetrominos)[keyof typeof tetrominos]
   | number[][];
 
+// todo: 색깔
 let currentTetrimino: CurrentTetrominoType = null;
 let gameOver = false;
 let count = 0;
@@ -118,6 +122,8 @@ function showGameOver() {
 
   const button = document.querySelector("#button-start") as HTMLButtonElement;
   button.disabled = false;
+
+  gameOver = true;
 }
 
 function updateScoreDisplay(score: number) {
@@ -128,11 +134,11 @@ function updateScoreDisplay(score: number) {
 function clearLineForScore() {
   for (let i = 0; i < board.length; i++) {
     if (board[i].every((e) => e)) {
-      board.splice(i, 1); // Remove the filled row
-      board.unshift(new Array(COLS).fill(0)); // Add an empty row at the top
+      board.splice(i, 1);
+      board.unshift(new Array(COLS).fill(0));
       score++;
       updateScoreDisplay(score);
-      i++; // Re-check the same index after shifting
+      i++;
     }
   }
 }
@@ -149,21 +155,30 @@ function render() {
   for (let x = 0; x < COLS; x++) {
     for (let y = 0; y < ROWS; y++) {
       if (board[y][x]) {
-        ctx.fillStyle = colors[board[y][x] - 1];
         drawBlock(canvas, x, y);
       }
     }
   }
 
   if (currentTetrimino) {
+    ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
+
     for (let y = 0; y < currentTetrimino.length; ++y) {
       for (let x = 0; x < currentTetrimino[0].length; ++x) {
         if (currentTetrimino[y][x]) {
-          ctx.fillStyle = colors[currentTetrimino[y][x] - 1];
           drawBlock(canvas, currentX + x, currentY + y);
         }
       }
     }
+  }
+
+  if (gameOver) {
+    ctx.font = "32px serif";
+    ctx.fillStyle = "black";
+    const text = "Game Over";
+    const metrics = ctx.measureText(text);
+
+    ctx.fillText("Game Over", (WIDTH - metrics.width) / 2, 100);
   }
 }
 
@@ -220,6 +235,8 @@ export function toggleGame(state: "start" | "pause") {
 export function newGame() {
   cancelAnimationFrame(raf);
   document.addEventListener("keydown", keyboardEvent);
+  gameOver = false;
+
   generateNewBoard();
   generateNewTetromino();
   render();
@@ -254,16 +271,12 @@ function keyboardEvent(event: KeyboardEvent) {
     // todo: move left
     if (isValidMove(currentTetrimino, currentX - 1, currentY)) {
       currentX--;
-    } else {
-      console.log("not happening");
     }
   }
   if (event.code === "ArrowRight") {
     // todo: move right
     if (isValidMove(currentTetrimino, currentX + 1, currentY)) {
       currentX++;
-    } else {
-      console.log("not happening");
     }
   }
   if (event.code === "ArrowDown") {
@@ -271,7 +284,6 @@ function keyboardEvent(event: KeyboardEvent) {
     if (isValidMove(currentTetrimino, currentX, currentY + 1)) {
       currentY++;
     } else {
-      console.log("freeze happens");
       freezeCurrentPiece();
       generateNewTetromino();
     }
@@ -285,9 +297,7 @@ function keyboardEvent(event: KeyboardEvent) {
 }
 
 export function newGameTest() {
-  // SRS 로직 시작
   document.addEventListener("keydown", keyboardEvent);
-
   generateNewBoard();
   generateNewTetromino();
   render();
