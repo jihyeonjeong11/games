@@ -1,5 +1,3 @@
-// todo: 펑션들 전부 param 받는 식으로 가기
-// todo: currentTetrimino 이름 좀더 테트리스스럽게 바꾸기
 import { drawGrid } from "./drawGrid";
 
 const WIDTH = 320;
@@ -56,7 +54,6 @@ let raf: any = null;
 export let gameState: "start" | "pause" = "pause";
 let currentY = 0;
 let currentX = 3;
-// 스태틱한 피스, 회전한 피스 타입 두가지
 type CurrentTetrominoType =
   | null
   | (typeof tetrominos)[keyof typeof tetrominos]
@@ -149,7 +146,6 @@ function render() {
   let ctx = canvas.getContext("2d")!;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // testing grid line
   drawGrid(canvas);
 
   for (let x = 0; x < COLS; x++) {
@@ -161,7 +157,8 @@ function render() {
   }
 
   if (currentTetrimino) {
-    ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
+    // ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
+    ctx.fillStyle = "blue";
 
     for (let y = 0; y < currentTetrimino.length; ++y) {
       for (let x = 0; x < currentTetrimino[0].length; ++x) {
@@ -265,22 +262,18 @@ function rotate(current: CurrentTetrominoType) {
 
 function keyboardEvent(event: KeyboardEvent) {
   event.preventDefault();
-  // 회전, 움직임
-  // todo: switch them to switch()
+
   if (event.code === "ArrowLeft") {
-    // todo: move left
     if (isValidMove(currentTetrimino, currentX - 1, currentY)) {
       currentX--;
     }
   }
   if (event.code === "ArrowRight") {
-    // todo: move right
     if (isValidMove(currentTetrimino, currentX + 1, currentY)) {
       currentX++;
     }
   }
   if (event.code === "ArrowDown") {
-    // todo: go down to bottom and freeze
     if (isValidMove(currentTetrimino, currentX, currentY + 1)) {
       currentY++;
     } else {
@@ -289,7 +282,6 @@ function keyboardEvent(event: KeyboardEvent) {
     }
   }
   if (event.code === "ArrowUp") {
-    // todo: rotate
     const test = rotate(currentTetrimino);
     currentTetrimino = test;
   }
@@ -307,13 +299,6 @@ export function pause() {
   console.log(pause);
 }
 
-// 충돌, 회전 로직
-
-// method 1: 직접 하나하나 좌표 계산
-// https://www.reddit.com/r/programminghorror/comments/f7ym4a/how_to_do_tetris_collision_detection_in_only_800/
-
-// method 2: Standard Rotation System
-// https://harddrop.com/wiki/SRS
-
-// todo: 부품 색깔
-// todo: pause?
+// todo : 사운드
+// todo: 블록 색
+// todo: pause
